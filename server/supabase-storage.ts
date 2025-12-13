@@ -172,6 +172,20 @@ export class SupabaseStorage implements IStorage {
     return data ? toVehicle(data) : undefined;
   }
 
+  async getVehicleByLicensePlate(licensePlate: string): Promise<Vehicle | undefined> {
+    const { data, error } = await supabaseAdmin
+      .from('vehicles')
+      .select('*')
+      .ilike('license_plate', licensePlate)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') return undefined;
+      throw error;
+    }
+    return data ? toVehicle(data) : undefined;
+  }
+
   async createVehicle(vehicle: InsertVehicle): Promise<Vehicle> {
     const row = toVehicleRow(vehicle);
     row.last_update = new Date().toISOString();

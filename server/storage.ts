@@ -9,6 +9,7 @@ import type {
 export interface IStorage {
   getVehicles(): Promise<Vehicle[]>;
   getVehicle(id: string): Promise<Vehicle | undefined>;
+  getVehicleByLicensePlate(licensePlate: string): Promise<Vehicle | undefined>;
   createVehicle(vehicle: InsertVehicle): Promise<Vehicle>;
   updateVehicle(id: string, updates: Partial<Vehicle>): Promise<Vehicle | undefined>;
   deleteVehicle(id: string): Promise<boolean>;
@@ -502,6 +503,12 @@ export class MemStorage implements IStorage {
 
   async getVehicle(id: string): Promise<Vehicle | undefined> {
     return this.vehicles.get(id);
+  }
+
+  async getVehicleByLicensePlate(licensePlate: string): Promise<Vehicle | undefined> {
+    return Array.from(this.vehicles.values()).find(
+      v => v.licensePlate.toLowerCase() === licensePlate.toLowerCase()
+    );
   }
 
   async createVehicle(vehicle: InsertVehicle): Promise<Vehicle> {

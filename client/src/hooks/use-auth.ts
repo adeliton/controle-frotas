@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthUser {
@@ -42,6 +42,18 @@ export function useAuthProvider(): AuthContextValue {
 
   // Carrega sessão inicial
   useEffect(() => {
+    // Se Supabase não está configurado, considera como autenticado (modo sem auth)
+    if (!isSupabaseConfigured) {
+      console.log('Supabase not configured, running without authentication');
+      setState({
+        user: { id: 'anonymous', email: undefined, username: 'Usuário' },
+        session: null,
+        isLoading: false,
+        isAuthenticated: true, // Permite acesso sem login
+      });
+      return;
+    }
+
     const initAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();

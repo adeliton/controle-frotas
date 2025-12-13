@@ -4,6 +4,7 @@ import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { registerAuthRoutes } from "./auth-routes";
+import { registerTrackingRoutes } from "./tracking-routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
@@ -72,6 +73,14 @@ app.use((req, res, next) => {
   if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     registerAuthRoutes(app);
     log('Auth routes registered (Supabase configured)');
+  }
+  
+  // Registra rotas de rastreamento (requer TRACKING_API_KEY)
+  if (process.env.TRACKING_API_KEY) {
+    registerTrackingRoutes(app);
+    log('Tracking routes registered');
+  } else {
+    log('Tracking routes disabled (TRACKING_API_KEY not set)');
   }
   
   await registerRoutes(httpServer, app);

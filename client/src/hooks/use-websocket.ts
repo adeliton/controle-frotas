@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { queryClient } from "@/lib/queryClient";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import type { Vehicle } from "@shared/schema";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
@@ -43,8 +43,7 @@ export function useVehicleRealtime() {
 
   useEffect(() => {
     // Verifica se Supabase está configurado
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    if (!supabaseUrl) {
+    if (!isSupabaseConfigured) {
       console.log("Supabase not configured, skipping realtime");
       return;
     }
@@ -113,8 +112,7 @@ export function useAlertsRealtime() {
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    if (!supabaseUrl) return;
+    if (!isSupabaseConfigured) return;
 
     const channel = supabase
       .channel('alerts-changes')
@@ -154,8 +152,7 @@ export function useVehicleWebSocket() {
 
   const connect = useCallback(() => {
     // Se Supabase está configurado, não usa WebSocket
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    if (supabaseUrl) {
+    if (isSupabaseConfigured) {
       console.log("Using Supabase Realtime instead of WebSocket");
       return;
     }
@@ -225,12 +222,10 @@ export function useVehicleWebSocket() {
  * senão fallback para WebSocket tradicional
  */
 export function useVehicleUpdates() {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  
   // Usa Supabase Realtime se configurado
   const realtimeRef = useVehicleRealtime();
   // Fallback para WebSocket se Supabase não está configurado
   const wsRef = useVehicleWebSocket();
   
-  return supabaseUrl ? realtimeRef : wsRef;
+  return isSupabaseConfigured ? realtimeRef : wsRef;
 }
